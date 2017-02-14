@@ -1,0 +1,24 @@
+{# biblio.html.twig #}
+{% extends "layout.twig"  %}
+{% block body %}
+    {% if biblio is not empty %}
+    <table>
+        <thead>
+            <tr><th>Titre</th><th>Nom auteur</th><th>Prénom auteur</th></tr>
+        </thead>
+        <tbody>
+            {# afficher les titres et noms des auteurs des livres #}
+            {% for item in biblio %}
+                <tr>
+                    <td>{{ item.titre }}</td>
+                    <td>{{ item.nom }}</td>
+                    <td>{{ item.prenom }}</td>
+                </tr>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        Aucun livre dans la bibliothèque.
+    {% endif %}
+{% endblock %}

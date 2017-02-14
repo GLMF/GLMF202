@@ -1,0 +1,44 @@
+#!/bin/ash
+mount -t proc proc /proc -o nosuid,noexec,nodev
+mount -t sysfs sys /sys -o nosuid,noexec,nodev
+mount -t devtmpfs dev /dev -o mode=0755,nosuid
+mount -t tmpfs run /run -o nosuid,nodev,mode=0755
+kmod static-nodes --format=tmpfiles --output=/run/tmpfiles.d/kmod.conf
+systemd-tmpfiles --prefix=/dev --create --boot
+/usr/lib/systemd/systemd-udevd --daemon --resolve-names=never
+udevadm trigger --action=add --type=subsystems
+udevadm trigger --action=add --type=devices
+udevadm settle
+
+mkdir /live
+mount -t tmpfs tmpfs /live
+mkdir /live/media
+while [ -z "$livesys" ]; do #tant que la clé n’est pas détectée
+	sleep 1
+	livesys=`blkid | grep "LABEL=\"LiveSys\"" | sed -n 1p | cut -f1 -d:`
+done
+mount -o ro $livesys /live/media
+livedata=`echo $livesys | cut -c1-8`"3"
+
+mkdir /live/squashfs
+mount -o loop -t squashfs /live/media/system.sfs /live/squashfs
+mkdir /live/changes
+mkdir /live/.workdir
+mkdir /mnt
+mount -t overlay -o workdir=/live/.workdir,upperdir=/live/changes,lowerdir=/live/squashfs overlay /mnt
+
+cat /etc/mtab | sed 's@overlay /mnt@overlay /@' > /mnt/etc/mtab
+cat > /mnt/etc/fstab << EOF
+proc /proc proc defaults 0 0
+sysfs /sys sysfs defaults 0 0
+tmpfs /dev/shm tmpfs defaults 0 0
+none / tmpfs defaults 0 0
+$livedata /home ext4 noatime 0 0
+EOF
+
+mkdir /mnt/live
+mount -o rbind /live /mnt/live
+
+udevadm info --cleanup-db
+udevadm control --exit
+exec switch_root /mnt /sbin/init

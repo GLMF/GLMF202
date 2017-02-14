@@ -1,0 +1,4 @@
+Titre; Auteur
+{% for item in biblio|sort %}
+{{ item.titre }}; {{ item.nom|capitalize }}
+{% endfor %}

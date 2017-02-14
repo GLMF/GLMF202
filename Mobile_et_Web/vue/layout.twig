@@ -1,0 +1,19 @@
+{# layout.twig #}
+<!doctype html>
+<html>
+  <head>
+    <title>{{ titre_page }}</title>
+    <meta charset='UTF-8'>
+    <link rel="stylesheet" href="style/style.css">
+  </head>
+  <body>
+    {% include 'header.twig' %}
+    <nav>
+        {% block menu %} 
+            {% include 'menu.twig' %}
+        {% endblock %}
+    </nav>
+    {# afficher les titres et noms des auteurs des livres #}
+    <section>{% block body %} {% endblock %}</section>
+  </body>
+</html>

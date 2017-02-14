@@ -1,0 +1,8 @@
+{# biblio.resume.twig #}
+{% extends "layout.twig"  %}
+{% block body %}
+    <h3>Titre</h3>
+    {% for item in biblio %}
+        <p>{{ item.titre }}</p>
+    {% endfor %}
+{% endblock %}
